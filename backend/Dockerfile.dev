@@ -3,10 +3,24 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+# Video making (Make video): ffmpeg to encode, CJK fonts for Traditional Chinese, and jf 粉圓 (Huninn),
+# a rounded Traditional Chinese font that suits the cartoon style.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg fonts-noto-cjk curl ca-certificates \
+    && mkdir -p /usr/share/fonts/truetype/huninn \
+    && curl -fsSL -o /usr/share/fonts/truetype/huninn/Huninn-Regular.ttf \
+        https://github.com/google/fonts/raw/main/ofl/huninn/Huninn-Regular.ttf \
+    && fc-cache -f \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Headless Chromium that renders the video scenes frame by frame.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN playwright install --with-deps chromium && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 

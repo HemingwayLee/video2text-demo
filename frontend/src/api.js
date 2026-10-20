@@ -4,7 +4,8 @@ async function request(path, options = {}) {
     ...options,
   });
   if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText}`);
+    const body = await res.json().catch(() => null);
+    throw new Error(typeof body?.detail === "string" ? body.detail : `${res.status} ${res.statusText}`);
   }
   return res.status === 204 ? null : res.json();
 }
@@ -18,7 +19,28 @@ export const api = {
   updateConversation: (id, patch) =>
     request(`/conversations/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
   deleteConversation: (id) => request(`/conversations/${id}`, { method: "DELETE" }),
+
+  reelJobs: (folder) => request(`/reels/${encodeURIComponent(folder)}/jobs`),
+  /** kind: "stt" (speech-to-text), "v2t" (explain the video) or "video" (options: { aspect: "9x16" | "16x9" }) */
+  startReelJob: (folder, reelId, kind, options) =>
+    request(`/reels/${encodeURIComponent(folder)}/${encodeURIComponent(reelId)}/${kind}`, {
+      method: "POST",
+      body: options ? JSON.stringify(options) : undefined,
+    }),
+
+  youtubeChannels: () => request("/youtube/channels"),
+  youtubeChannel: (folder) => request(`/youtube/channels/${encodeURIComponent(folder)}`),
+  /** Download a channel's latest `count` videos; resolves with { folder, job } once the channel is found. */
+  startYoutubeDownload: (channel, count) =>
+    request("/youtube/downloads", { method: "POST", body: JSON.stringify({ channel, count }) }),
 };
+
+/** A reel's own video file, served by the backend (for folders the browser doesn't read itself). */
+export const sourceVideoUrl = (folder, reelId) =>
+  `/api/reels/${encodeURIComponent(folder)}/${encodeURIComponent(reelId)}/source`;
+
+export const madeVideoUrl = (folder, reelId, aspect, { download = false } = {}) =>
+  `/api/reels/${encodeURIComponent(folder)}/${encodeURIComponent(reelId)}/videos/${aspect}${download ? "?download=true" : ""}`;
 
 /**
  * Send a chat message and stream Claude Code's reply as server-sent events.

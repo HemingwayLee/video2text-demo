@@ -1,7 +1,7 @@
 """Bridge between the chat API and Claude Code via the Claude Agent SDK."""
 
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Callable
 from typing import Any
 
 from claude_agent_sdk import (
@@ -42,7 +42,15 @@ def _tool_result_content(content: Any) -> str:
     return "\n".join(part.get("text", "") for part in content if isinstance(part, dict))
 
 
-async def run_turn(prompt: str, model: str, resume: str | None) -> AsyncIterator[dict[str, Any]]:
+async def run_turn(
+    prompt: str,
+    model: str,
+    resume: str | None,
+    *,
+    cwd: str | None = None,
+    allowed_tools: list[str] | None = None,
+    on_activity: Callable[[], None] | None = None,
+) -> AsyncIterator[dict[str, Any]]:
     """Run one chat turn through Claude Code and yield UI events.
 
     Event shapes:
@@ -51,6 +59,9 @@ async def run_turn(prompt: str, model: str, resume: str | None) -> AsyncIterator
       {"type": "tool_use", "id", "name", "input"}
       {"type": "tool_result", "tool_use_id", "content", "is_error"}
       {"type": "result", "session_id", "cost_usd", "is_error", "subtype"}
+
+    on_activity is called for every message from Claude Code, including ones that yield no event
+    (e.g. a tool call's input streaming in), so callers can tell a long step from a stalled one.
     """
     ensure_credentials()
     # On a subscription, total_cost_usd is an API-price estimate, not what you're billed.
@@ -58,16 +69,18 @@ async def run_turn(prompt: str, model: str, resume: str | None) -> AsyncIterator
 
     options = ClaudeAgentOptions(
         model=model,
-        cwd=settings.claude_workspace,
+        cwd=cwd or settings.claude_workspace,
         resume=resume,
         system_prompt={"type": "preset", "preset": "claude_code"},
-        allowed_tools=settings.claude_allowed_tools,
+        allowed_tools=allowed_tools or settings.claude_allowed_tools,
         # No interactive approval in the web UI: anything not in allowed_tools is denied.
         permission_mode="dontAsk",
         include_partial_messages=True,
     )
 
     async for message in query(prompt=prompt, options=options):
+        if on_activity:
+            on_activity()
         if isinstance(message, SystemMessage) and message.subtype == "init":
             yield {"type": "session", "session_id": message.data.get("session_id")}
 

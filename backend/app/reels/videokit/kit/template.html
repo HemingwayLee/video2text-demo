@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="kit/anime.css">
+  <script src="kit/anime.js"></script>
+  <style>
+    /* Scene-specific drawing and layout goes here. */
+    .sun { top: 6vmin; right: 6vmin; }
+    .cloud { top: 10vmin; left: 4vmin; }
+  </style>
+</head>
+<body>
+  <main class="stage bg-sky">
+    <div class="ground"></div>
+    <div class="abs sun pop"><a-sun class="w-25"></a-sun></div>
+    <div class="abs cloud fade-in d1"><a-cloud class="w-30 float"></a-cloud></div>
+
+    <h1 class="title yellow pop d2">菜園小祕訣</h1>
+    <div class="bounce-in d3"><a-chibi class="w-50 bob" expression="happy" pose="wave" check></a-chibi></div>
+  </main>
+</body>
+</html>

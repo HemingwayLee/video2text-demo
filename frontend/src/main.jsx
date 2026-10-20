@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { BrowserRouter } from "react-router";
 import App from "./App";
 
 const theme = createTheme({
@@ -16,7 +17,9 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ThemeProvider theme={theme} defaultMode="system">
       <CssBaseline />
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </ThemeProvider>
   </StrictMode>
 );

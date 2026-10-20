@@ -12,5 +12,9 @@ class Settings(BaseSettings):
         "Read", "Write", "Edit", "Glob", "Grep", "Bash", "WebSearch", "WebFetch", "TodoWrite",
     ]
 
+    # Downloaded reels (mounted from the host) and the Claude Code jobs that run on them (stt, v2t)
+    reels_dir: str = "/reels"
+    reel_job_concurrency: int = 1
+
 
 settings = Settings()

@@ -28,6 +28,10 @@ services:
       CLAUDE_WORKSPACE: /workspace
       # Keep Claude Code's session transcripts so conversations can resume after restarts.
       CLAUDE_CONFIG_DIR: /claude-config
+      REELS_DIR: /reels
+      # Local Whisper model for speech-to-text: tiny | base | small | medium | large-v3
+      WHISPER_MODEL: ${WHISPER_MODEL:-medium}
+      HF_HOME: /models
     ports:
       - "8001:8000"
     volumes:
@@ -35,6 +39,10 @@ services:
       # The directory Claude Code works in (reads, writes, runs commands).
       - ./workspace:/workspace
       - claude-config:/claude-config
+      # Downloaded reels (<id>.mp4 + <id>.json); STT results are written back into the JSON files.
+      - ${REELS_HOST_DIR:-${HOME}/Downloads/reels}:/reels
+      # Whisper model cache, so the model downloads once.
+      - whisper-models:/models
     depends_on:
       db:
         condition: service_healthy
@@ -58,3 +66,4 @@ services:
 volumes:
   pgdata:
   claude-config:
+  whisper-models:

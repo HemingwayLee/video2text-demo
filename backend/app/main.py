@@ -11,6 +11,8 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.claude import MODELS, run_turn
 from app.config import settings
+from app.reels.routes import router as reels_router
+from app.youtube.routes import router as youtube_router
 from app.db import Base, SessionLocal, engine, get_db
 
 logger = logging.getLogger(__name__)
@@ -32,6 +34,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(reels_router)
+app.include_router(youtube_router)
+
 
 def _get_conversation(db: Session, conversation_id: int) -> models.Conversation:
     conversation = db.get(models.Conversation, conversation_id)

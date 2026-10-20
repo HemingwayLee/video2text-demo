@@ -4,3 +4,14 @@ sqlalchemy==2.0.36
 psycopg[binary]==3.2.3
 pydantic-settings==2.7.0
 claude-agent-sdk==0.2.165
+faster-whisper==1.1.1
+opencc-python-reimplemented==0.1.7
+huggingface_hub>=0.23,<1.0
+requests>=2.32,<3
+av==13.1.0
+pillow==11.3.0
+playwright==1.55.0
+edge-tts==7.3.1
+# YouTube downloads; yt-dlp needs a JS runtime (Deno) for YouTube. Unpinned minimums: old yt-dlp breaks on YouTube.
+yt-dlp[default]>=2026.8.19
+deno>=2.5
